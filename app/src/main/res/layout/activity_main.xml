@@ -73,14 +73,13 @@
         app:layout_constraintVertical_bias="0.747" />
 
     <TextView
-        android:id="@+id/Xcood"
+        android:id="@+id/txtSpeed"
         android:layout_width="265dp"
         android:layout_height="49dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="X:"
         android:textAlignment="viewStart"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
@@ -94,14 +93,13 @@
         app:layout_constraintVertical_bias="0.844" />
 
     <TextView
-        android:id="@+id/Ycood"
+        android:id="@+id/txtDirection"
         android:layout_width="265dp"
         android:layout_height="49dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Y:"
         android:textAlignment="viewStart"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
