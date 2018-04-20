@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,12 +19,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtDirection;
 
     private SpeedCheck speedChecker;
+    private OutputHandler outputHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -31,6 +32,15 @@ public class MainActivity extends AppCompatActivity {
         myMessage  = (TextView) findViewById(R.id.MyMessage);
         txtSpeed = (TextView) findViewById(R.id.txtSpeed);
         txtDirection = (TextView) findViewById(R.id.txtDirection);
+
+        outputHandler = new OutputHandler() {
+            @Override
+            public void processOutput(double speed, RotationalDirection direction) {
+                txtSpeed.setText(Double.toString(speed));
+                txtDirection.setText(direction.name());
+                mainImage.invalidate();
+            }
+        };
 
         mainImage.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -115,10 +125,8 @@ public class MainActivity extends AppCompatActivity {
                 xPrevious = xNow;
                 yPrevious = yNow;
                 double distance = Math.sqrt(dx * dx + dy * dy);
-                RotaionalDirection rd = determineRotaionalDirection(quadrant, direction);
-                txtSpeed.setText(Double.toString(distance));
-                txtDirection.setText(rd.name());
-                mainImage.invalidate();
+                RotationalDirection rd = determineRotaionalDirection(quadrant, direction);
+                MainActivity.this.outputHandler.processOutput(distance, rd);
                 if(!stop) {
                     tickEventHandler.postDelayed(this, delay);
                 }
@@ -176,37 +184,37 @@ public class MainActivity extends AppCompatActivity {
             return direction;
         }
 
-        private RotaionalDirection determineRotaionalDirection(Quadrant q, Direction d) {
+        private RotationalDirection determineRotaionalDirection(Quadrant q, Direction d) {
 
-            RotaionalDirection rd = RotaionalDirection.STILL;
+            RotationalDirection rd = RotationalDirection.STILL;
             if(d != Direction.STATIONARY) {
                 switch (q) {
                     case TOP_LEFT:
                         if (d == Direction.NORTH || d == Direction.EAST || d == Direction.NORTH_EAST || d == Direction.NORTH_WEST) {
-                            rd = RotaionalDirection.CLOCKWISE;
+                            rd = RotationalDirection.CLOCKWISE;
                         } else {
-                            rd = RotaionalDirection.ANTI_CLOCKWISE;
+                            rd = RotationalDirection.ANTI_CLOCKWISE;
                         }
                         break;
                     case TOP_RIGHT:
                         if (d == Direction.SOUTH || d == Direction.EAST || d == Direction.SOUTH_EAST || d == Direction.SOUTH_WEST) {
-                            rd = RotaionalDirection.CLOCKWISE;
+                            rd = RotationalDirection.CLOCKWISE;
                         } else {
-                            rd = RotaionalDirection.ANTI_CLOCKWISE;
+                            rd = RotationalDirection.ANTI_CLOCKWISE;
                         }
                         break;
                     case BOTTOM_LEFT:
                         if (d == Direction.NORTH || d == Direction.WEST || d == Direction.SOUTH_EAST || d == Direction.SOUTH_WEST) {
-                            rd = RotaionalDirection.CLOCKWISE;
+                            rd = RotationalDirection.CLOCKWISE;
                         } else {
-                            rd = RotaionalDirection.ANTI_CLOCKWISE;
+                            rd = RotationalDirection.ANTI_CLOCKWISE;
                         }
                         break;
                     case BOTTOM_RIGHT:
                         if (d == Direction.SOUTH || d == Direction.WEST || d == Direction.NORTH_EAST || d == Direction.NORTH_WEST) {
-                            rd = RotaionalDirection.CLOCKWISE;
+                            rd = RotationalDirection.CLOCKWISE;
                         } else {
-                            rd = RotaionalDirection.ANTI_CLOCKWISE;
+                            rd = RotationalDirection.ANTI_CLOCKWISE;
                         }
                         break;
                 }
