@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         txtSpeed = (TextView) findViewById(R.id.txtSpeed);
         txtDirection = (TextView) findViewById(R.id.txtDirection);
 
+/*
         outputHandler = new OutputHandler() {
             @Override
             public void processOutput(double speed, RotationalDirection direction) {
@@ -41,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
                 mainImage.invalidate();
             }
         };
+*/
+        //send stuff to bluetooth
+        outputHandler = new BluetoothSender(this);
 
         mainImage.setOnTouchListener(new View.OnTouchListener() {
             @Override
