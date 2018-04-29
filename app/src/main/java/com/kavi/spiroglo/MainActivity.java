@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+
     private ImageView mainImage;
     private TextView myMessage;
     private TextView txtSpeed;
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        speedChecker = new SpeedCheck(10);
+        speedChecker = new SpeedCheck(100);
         speedChecker.start();
     }
 
@@ -102,11 +104,14 @@ public class MainActivity extends AppCompatActivity {
                 quadrant = Quadrant.BOTTOM_RIGHT;
             }
         }
+        Log.d(TAG, "vwidth: " + rectf.width() + ", vheight: " + rectf.height() + ", x=" + x + ", y=" + y + " Q: " + quadrant);
         return quadrant;
     }
 
 
     private class SpeedCheck {
+
+        private static final String TAG = "SpeedCheck";
 
         long delay;
 
@@ -139,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
         SpeedCheck(long delayMillis) {
             this.delay = delayMillis;
-
         }
 
         void start() {
@@ -168,10 +172,18 @@ public class MainActivity extends AppCompatActivity {
                     direction = Direction.EAST;
                 }
                 else if(dy > 0) {
-                    direction = Direction.SOUTH_EAST;
+                    //direction = Direction.SOUTH_EAST;
+                    direction = Direction.SOUTH;
+                    if(dx > dy) {
+                        direction = Direction.EAST;
+                    }
                 }
                 else {
-                    direction = Direction.NORTH_EAST;
+                    //direction = Direction.NORTH_EAST;
+                    direction = Direction.NORTH;
+                    if(dx > -dy) {
+                        direction = Direction.EAST;
+                    }
                 }
             }
             else {
@@ -179,12 +191,21 @@ public class MainActivity extends AppCompatActivity {
                     direction = Direction.WEST;
                 }
                 else if(dy > 0) {
-                    direction = Direction.SOUTH_WEST;
+                    //direction = Direction.SOUTH_WEST;
+                    direction = Direction.SOUTH;
+                    if(-dx > dy) {
+                        direction = Direction.WEST;
+                    }
                 }
                 else {
-                    direction = Direction.NORTH_WEST;
+                    //direction = Direction.NORTH_WEST;
+                    direction = Direction.NORTH;
+                    if(-dx > -dy) {
+                        direction = Direction.WEST;
+                    }
                 }
             }
+            Log.d(TAG, "direction is " + direction);
             return direction;
         }
 
@@ -193,29 +214,32 @@ public class MainActivity extends AppCompatActivity {
             RotationalDirection rd = RotationalDirection.STILL;
             if(d != Direction.STATIONARY) {
                 switch (q) {
-                    case TOP_LEFT:
-                        if (d == Direction.NORTH || d == Direction.EAST || d == Direction.NORTH_EAST || d == Direction.NORTH_WEST) {
-                            rd = RotationalDirection.CLOCKWISE;
-                        } else {
-                            rd = RotationalDirection.ANTI_CLOCKWISE;
-                        }
-                        break;
                     case TOP_RIGHT:
-                        if (d == Direction.SOUTH || d == Direction.EAST || d == Direction.SOUTH_EAST || d == Direction.SOUTH_WEST) {
-                            rd = RotationalDirection.CLOCKWISE;
-                        } else {
-                            rd = RotationalDirection.ANTI_CLOCKWISE;
-                        }
-                        break;
-                    case BOTTOM_LEFT:
-                        if (d == Direction.NORTH || d == Direction.WEST || d == Direction.SOUTH_EAST || d == Direction.SOUTH_WEST) {
+                        if (d == Direction.SOUTH || d == Direction.EAST) {
                             rd = RotationalDirection.CLOCKWISE;
                         } else {
                             rd = RotationalDirection.ANTI_CLOCKWISE;
                         }
                         break;
                     case BOTTOM_RIGHT:
-                        if (d == Direction.SOUTH || d == Direction.WEST || d == Direction.NORTH_EAST || d == Direction.NORTH_WEST) {
+                        //if (d == Direction.SOUTH || d == Direction.WEST || d == Direction.SOUTH_EAST || d == Direction.SOUTH_WEST) {
+                        if (d == Direction.SOUTH || d == Direction.WEST) {
+                            rd = RotationalDirection.CLOCKWISE;
+                        } else {
+                            rd = RotationalDirection.ANTI_CLOCKWISE;
+                        }
+                        break;
+                    case BOTTOM_LEFT:
+                        //if (d == Direction.NORTH || d == Direction.WEST || d == Direction.NORTH_EAST || d == Direction.NORTH_WEST) {
+                        if (d == Direction.NORTH || d == Direction.WEST) {
+                            rd = RotationalDirection.CLOCKWISE;
+                        } else {
+                            rd = RotationalDirection.ANTI_CLOCKWISE;
+                        }
+                        break;
+                    case TOP_LEFT:
+                        //if (d == Direction.NORTH || d == Direction.EAST || d == Direction.NORTH_EAST || d == Direction.NORTH_WEST) {
+                        if (d == Direction.NORTH || d == Direction.EAST) {
                             rd = RotationalDirection.CLOCKWISE;
                         } else {
                             rd = RotationalDirection.ANTI_CLOCKWISE;
@@ -223,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
+            Log.d(TAG, "rotational direction is " + rd);
             return rd;
         }
     }

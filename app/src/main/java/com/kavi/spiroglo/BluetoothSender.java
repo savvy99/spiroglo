@@ -18,8 +18,9 @@ import java.util.concurrent.Executors;
 public class BluetoothSender implements OutputHandler {
 
     private static final String TAG = "BluetoothSender";
-
+    private static final byte[] BT_NEWLINE = new byte[]{'\r','\n'};
     private static final UUID BT_UUID_INSECURE = UUID.fromString("889b4c44-4738-11e8-842f-0ed5f89f718b");
+    //private static final UUID BT_UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private MainActivity mainActivity;
     private BluetoothAdapter btAdapter;
@@ -27,6 +28,7 @@ public class BluetoothSender implements OutputHandler {
 
     private ConnectThread connectThread;
     private SendSession sendSession;
+    private boolean connected = false;
 
     public BluetoothSender(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -51,20 +53,27 @@ public class BluetoothSender implements OutputHandler {
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
                 //String deviceHardwareAddress = device.getAddress(); // MAC address
-                if("RNBT-9762".equals(deviceName)) {
+                //if("RNBT-9762".equals(deviceName)) {
+                if("Kavi G4".equals(deviceName)) {
                     btDevice = device;
+                    Log.d(TAG, "Got device " + btDevice.getName());
                 }
             }
+        }
+        if(btDevice == null) {
+            Log.e(TAG, "Device not found");
         }
     }
 
     void startSender() {
-        Log.d(TAG, "startClient");
-        if(connectThread != null) {
-            connectThread.cancel();
+        if(btDevice != null) {
+            Log.d(TAG, "startClient");
+            if (connectThread != null) {
+                connectThread.cancel();
+            }
+            connectThread = new ConnectThread();
+            Executors.newSingleThreadExecutor().submit(connectThread);
         }
-        connectThread = new ConnectThread();
-        Executors.newSingleThreadExecutor().submit(connectThread);
     }
 
     private void checkBtPermissions() {
@@ -93,6 +102,7 @@ public class BluetoothSender implements OutputHandler {
                 Log.d(TAG, "run: ConnectThread: Trying to create InsecureRfCommSocket using UUID");
                 btDevice.getUuids();
                 tmp = btDevice.createInsecureRfcommSocketToServiceRecord(BT_UUID_INSECURE);
+                //tmp = btDevice.createRfcommSocketToServiceRecord(BT_UUID_INSECURE);
             }
             catch(IOException ex) {
                 Log.e(TAG, "run: ConnectThread exception" + ex.getMessage());
@@ -100,22 +110,37 @@ public class BluetoothSender implements OutputHandler {
             btSocket = tmp;
             btAdapter.cancelDiscovery();
 
-            try {
-                btSocket.connect();
-                Log.d(TAG, "run: ConnectThread connected");
-            }
-            catch(IOException ex) {
-                Log.e(TAG, "run: ConnectThread error: "+ ex.getMessage());
+            boolean sokectConnected = false;
+            if(btSocket != null) {
                 try {
-                    btSocket.close();
-                }
-                catch(IOException exx) {
-                    Log.e(TAG, "run: ConnectThread: closing socket error " + exx.getMessage());
-                }
-                Log.d(TAG, "run: ConnectThread: Could not connect to UUID: " + BT_UUID_INSECURE);
-            }
+                    btSocket.connect();
+                    sokectConnected = true;
+                    Log.d(TAG, "run: ConnectThread connected");
+                } catch (IOException ex) {
+                    Log.e(TAG, "run: ConnectThread error: " + ex.getMessage());
+                    try {
+                        Log.d(TAG,"Trying fallback...");
+                        btSocket =(BluetoothSocket) btDevice.getClass().getMethod("createRfcommSocket",
+                                new Class[] {int.class}).invoke(btDevice,2);
+                        btSocket.connect();
+                        sokectConnected = true;
+                        Log.d(TAG,"run: Connected on fallback");
+                    }
+                    catch (Exception e2) {
+                        Log.e(TAG, "run: Couldn't establish Bluetooth connection!");
+                    }
 
-            sendSession = new SendSession(btSocket);
+                    Log.d(TAG, "run: ConnectThread: Could not connect to UUID: " + BT_UUID_INSECURE);
+                }
+
+                if(sokectConnected) {
+                    sendSession = new SendSession(btSocket);
+                    Log.d(TAG, "run: ConnectThread: Created SendSession: ");
+                }
+            }
+            else {
+                Log.e(TAG, "Socket not established for device " + btDevice.getName());
+            }
         }
 
         void cancel() {
@@ -146,15 +171,26 @@ public class BluetoothSender implements OutputHandler {
                 Log.e(TAG, "ConnectedThread: Error created output stream");
             }
             outputStream = tmpOut;
-
+            connected = true;
+            Log.d(TAG, "ConnectedThread: Connected!");
         }
 
         void write(byte[] bytes) {
             try {
                 outputStream.write(bytes);
+                Log.d(TAG, "Sent " + ByteBuffer.wrap(bytes).getDouble());
+            } catch (IOException ex) {
+                Log.e(TAG, "write(byte[]): ConnectedThread: could not write to output stream " + ex.getMessage());
             }
-            catch(IOException ex) {
-                Log.e(TAG, "write: ConnectedThread: could not write to output stream " + ex.getMessage());
+        }
+
+        void write(String strSpeed) {
+            try {
+                outputStream.write(strSpeed.getBytes("UTF-8"));
+                outputStream.write(BT_NEWLINE);
+                Log.d(TAG, "Sent " + strSpeed);
+            } catch (IOException ex) {
+                Log.e(TAG, "write(Sting): ConnectedThread: could not write to output stream " + ex.getMessage());
             }
         }
 
@@ -170,9 +206,14 @@ public class BluetoothSender implements OutputHandler {
 
     @Override
     public void processOutput(double speed, RotationalDirection direction) {
-        if(direction == RotationalDirection.ANTI_CLOCKWISE) {
-            speed = -speed;
+        if(connected) {
+            if (direction == RotationalDirection.ANTI_CLOCKWISE) {
+                speed = -speed;
+            }
+            //convert speed to a string representation
+            String strSpeed = Double.toString(speed);
+            //sendSession.write(ByteBuffer.allocate(8).putDouble(speed).array());
+            sendSession.write(strSpeed);
         }
-        sendSession.write(ByteBuffer.allocate(8).putDouble(speed).array());
     }
 }
