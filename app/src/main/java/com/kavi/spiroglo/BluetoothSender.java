@@ -53,8 +53,7 @@ public class BluetoothSender implements OutputHandler {
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
                 //String deviceHardwareAddress = device.getAddress(); // MAC address
-                //if("RNBT-9762".equals(deviceName)) {
-                if("Kavi G4".equals(deviceName)) {
+                if("RNBT-9762".equals(deviceName)) {
                     btDevice = device;
                     Log.d(TAG, "Got device " + btDevice.getName());
                 }
@@ -121,7 +120,7 @@ public class BluetoothSender implements OutputHandler {
                     try {
                         Log.d(TAG,"Trying fallback...");
                         btSocket =(BluetoothSocket) btDevice.getClass().getMethod("createRfcommSocket",
-                                new Class[] {int.class}).invoke(btDevice,2);
+                                new Class[] {int.class}).invoke(btDevice,1);
                         btSocket.connect();
                         sokectConnected = true;
                         Log.d(TAG,"run: Connected on fallback");
