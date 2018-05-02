@@ -16,9 +16,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private ImageView mainImage;
-    private TextView myMessage;
-    private TextView txtSpeed;
-    private TextView txtDirection;
 
     private SpeedCheck speedChecker;
     private OutputHandler outputHandler;
@@ -31,9 +28,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         mainImage = (ImageView) findViewById(R.id.mainImage);
-        myMessage  = (TextView) findViewById(R.id.MyMessage);
-        txtSpeed = (TextView) findViewById(R.id.txtSpeed);
-        txtDirection = (TextView) findViewById(R.id.txtDirection);
 
 /*
         outputHandler = new OutputHandler() {
@@ -104,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 quadrant = Quadrant.BOTTOM_RIGHT;
             }
         }
-        Log.d(TAG, "vwidth: " + rectf.width() + ", vheight: " + rectf.height() + ", x=" + x + ", y=" + y + " Q: " + quadrant);
+        //Log.d(TAG, "vwidth: " + rectf.width() + ", vheight: " + rectf.height() + ", x=" + x + ", y=" + y + " Q: " + quadrant);
         return quadrant;
     }
 
@@ -205,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-            Log.d(TAG, "direction is " + direction);
+            //Log.d(TAG, "direction is " + direction);
             return direction;
         }
 
@@ -247,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
-            Log.d(TAG, "rotational direction is " + rd);
+            //Log.d(TAG, "rotational direction is " + rd);
             return rd;
         }
     }
